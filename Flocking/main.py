@@ -16,7 +16,7 @@ geometry_size = 1000
 grid_size=10
 grid_length=int(geometry_size/grid_size)
 default_geometry = str(geometry_size) + "x" + str(geometry_size)
-frames = 1000
+frames = 2000
 
 numLoops=1
 
@@ -118,7 +118,7 @@ def main(args, loop):
 
     boids = pg.sprite.RenderUpdates()
 
-    add_boids(boids, args.num_boids)
+    add_boids(boids)
 
     # Main game loop.
     dt = 1/fps  # dt is the time since last frame.
@@ -154,15 +154,25 @@ def main(args, loop):
 
     plt.figure(3)
     plt.xlabel("Time")
-    plt.ylabel("Standard Deviation")
+    plt.ylabel("Mean-square Deviation")
     plt.plot(times, std_devs)
 
     plt.show()
 
 
-def add_boids(boids, num_boids):
-    for _ in range(num_boids):
-        boids.add(Boid())
+def add_boids(boids):
+    field_pos_x = grid_length
+    while field_pos_x <= pg.display.Info().current_w:
+        field_pos_y = grid_length
+        while field_pos_y <= pg.display.Info().current_h:
+            boids.add(Boid(
+                pg.math.Vector2(
+                field_pos_x,field_pos_y),
+                pg.math.Vector2(
+                10, 0)))
+            field_pos_y += grid_length
+        field_pos_x += grid_length
+    args.num_boids = len(boids)
 
 def writeBoids(boids, loopNum):
         

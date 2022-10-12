@@ -1,3 +1,4 @@
+from turtle import heading
 import pygame as pg
 
 
@@ -27,32 +28,27 @@ class Vehicle(pg.sprite.Sprite):
             self.velocity = pg.Vector2(velocity)
         else:
             self.position = pg.Vector3(position)
-            self.acceleration = pg.Vector3(0, 0)
+            self.acceleration = pg.Vector3(0, 0, 0)
             self.velocity = pg.Vector3(velocity)
 
+        self.inclination = 0.0
         self.heading = 0.0
 
-        self.rect = self.image.get_rect(center=self.position)
+        self.position2D = [self.position[0], self.position[1]]
+
+        self.rect = self.image.get_rect(center=self.position2D)
 
     def update(self, dt, steering):
         self.acceleration = steering * dt
 
         # enforce turn limit
-        _, old_heading = self.velocity.as_polar()
         new_velocity = self.velocity + self.acceleration * dt
-        speed, new_heading = new_velocity.as_polar()
+        speed, inclination, heading = new_velocity.as_spherical()
 
-        heading_diff = 180 - (180 - new_heading + old_heading) % 360
-        # if abs(heading_diff) > self.max_turn:
-        #     if heading_diff > self.max_turn:
-        #         new_heading = old_heading + self.max_turn
-        #     else:
-        #         new_heading = old_heading - self.max_turn
-
-        self.velocity.from_polar((speed, new_heading))
+        self.velocity.from_spherical((speed, inclination, heading))
 
         # enforce speed limit
-        speed, self.heading = self.velocity.as_polar()
+        speed, self.inclination, self.heading = self.velocity.as_spherical()
         # if speed < self.min_speed:
         #     self.velocity.scale_to_length(self.min_speed)
 
@@ -71,11 +67,11 @@ class Vehicle(pg.sprite.Sprite):
         if self.debug:
             center = pg.Vector2((50, 50))
 
-            velocity = pg.Vector2(self.velocity)
+            velocity = pg.Vector2(self.velocity[0],self.velocity[1])
             speed = velocity.length()
             velocity += center
 
-            acceleration = pg.Vector2(self.acceleration)
+            acceleration = pg.Vector2(self.acceleration[0],self.acceleration[1])
             acceleration += center
 
             steering = pg.Vector2(steering)
@@ -91,9 +87,9 @@ class Vehicle(pg.sprite.Sprite):
                          steering - (5, 0), 3)
 
             self.image = overlay
-            self.rect = overlay.get_rect(center=self.position)
+            self.rect = overlay.get_rect(center=[self.position[0],self.position[1]])
         else:
-            self.rect = self.image.get_rect(center=self.position)
+            self.rect = self.image.get_rect(center=[self.position[0],self.position[1]])
 
     def avoid_edge(self):
         left = self.edges[0] - self.position.x
@@ -122,12 +118,18 @@ class Vehicle(pg.sprite.Sprite):
             self.position.y += Vehicle.max_y
         elif self.position.y > Vehicle.max_y:
             self.position.y -= Vehicle.max_y
+        
+        if self.position.z < 0:
+            self.position.z += Vehicle.max_z
+        elif self.position.z > Vehicle.max_z:
+            self.position.z -= Vehicle.max_z
 
     @staticmethod
     def set_boundary(edge_distance_pct):
         info = pg.display.Info()
         Vehicle.max_x = info.current_w
         Vehicle.max_y = info.current_h
+        Vehicle.max_z = info.current_h
         margin_w = Vehicle.max_x * edge_distance_pct / 100
         margin_h = Vehicle.max_y * edge_distance_pct / 100
         Vehicle.edges = [margin_w, margin_h, Vehicle.max_x - margin_w,

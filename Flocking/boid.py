@@ -1,3 +1,4 @@
+from tracemalloc import start
 import pygame as pg
 from random import uniform
 from vehicle import Vehicle
@@ -14,19 +15,15 @@ class Boid(Vehicle):
     max_turn = 5
     perception = 60
     crowding = 15
-    can_wrap = False
+    can_wrap = True
     edge_distance_pct = 5
     separation_constant = 1
     alignment_constant = 0.125
     cohesion_constant = 0.01
     ###############
 
-    def __init__(self):
+    def __init__(self, start_position, start_velocity):
         Boid.set_boundary(Boid.edge_distance_pct)
-
-        # Randomize starting position and velocity
-        start_position = pg.math.Vector2(0,0) #Boid.max_y
-        start_velocity = pg.math.Vector2(1,1) #Boid.max_speed
 
         self.start_position = start_position
         self.start_velocity = start_velocity

@@ -12,10 +12,10 @@ from pygame.locals import *
 from particle import Particle
 
 geometry_size = 1000
-grid_size=10
+grid_size=5
 grid_length=int(geometry_size/grid_size)
 default_geometry = str(geometry_size) + "x" + str(geometry_size)
-frames = 10000
+frames = 100000
 
 numLoops=1
 
@@ -125,50 +125,53 @@ def main(args, loop):
     # Loop forever!
     i=0
 
-    mean_dispersion = []
-    particle_diffusion = []
-    std_devs = []
+    # mean_dispersion = []
+    # particle_diffusion = []
+    # std_devs = []
     times = []
     start_time = time.time()
     for i in range(frames):
         update(dt, particles)
         draw(screen, background, particles)
         dt = fpsClock.tick(fps)
-        mean_dispersion.append(getMeanDispersionStatistics(particles))
-        particle_diffusion.append(getParticleDiffusivity(particles))
+        # mean_dispersion.append(getMeanDispersionStatistics(particles))
+        # particle_diffusion.append(getParticleDiffusivity(particles))
         # std_devs.append(getGridStatistics(particles))
         current_time = time.time() - start_time
         times.append(current_time)
 
     
-    writeParticles(particles, loop)
+    # writeParticles(particles, loop)
     # getGridStatistics(particles)
-    plt.figure(1)
-    plt.plot(times, particle_diffusion)
+    # plt.figure(1)
+    # plt.plot(times, particle_diffusion)
 
-    plt.figure(2)
-    plt.xlabel("Time")
-    plt.ylabel("Mean Squared Dispersion")
-    plt.plot(times, mean_dispersion)
+    # plt.figure(2)
+    # plt.xlabel("Time")
+    # plt.ylabel("Mean Squared Dispersion")
+    # plt.plot(times, mean_dispersion)
 
-    plt.figure(3)
-    plt.xlabel("Time")
-    plt.ylabel("Standard Deviation")
-    plt.plot(times, std_devs)
+    # plt.figure(3)
+    # plt.xlabel("Time")
+    # plt.ylabel("Standard Deviation")
+    # plt.plot(times, std_devs)
 
-    plt.show()
+    # plt.show()
 
 
 def add_particles(particles):
     field_pos_x = grid_length
-    while field_pos_x <= pg.display.Info().current_w:
+    while field_pos_x <= geometry_size:
         field_pos_y = grid_length
-        while field_pos_y <= pg.display.Info().current_h:
-            particles.add(Particle(
-                pg.math.Vector2(
-                field_pos_x,field_pos_y),
-                pg.math.Vector2(
-                10, 0)))
+        while field_pos_y <= geometry_size:
+            field_pos_z = grid_length
+            while field_pos_z <= geometry_size:
+                particles.add(Particle(
+                    pg.math.Vector3(
+                    field_pos_x,field_pos_y,field_pos_z),
+                    pg.math.Vector3(
+                    1, 0, 1)))
+                field_pos_z += grid_length
             field_pos_y += grid_length
         field_pos_x += grid_length
     args.num_particles = len(particles)
